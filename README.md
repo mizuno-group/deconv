@@ -3,7 +3,7 @@ a package for deconvolution of immune cells population
 
 # Dependency  
 * python 3.9.6
-* requirements: numpy, pandas, scipy, tqdm, scikit-learn, xgboost, lightgbm, pytorch-tabnet, torch
+* requirements: numpy, pandas, scipy, tqdm, scikit-learn, pycombat, matplotlib, seaborn
 
 # Licence  
 This software is released under the MIT License.  
@@ -19,8 +19,8 @@ inspired by
     1. e1017(svm method): https://cran.r-project.org/web/packages/e1071/e1071.pdf
 
 # Authors  
-* Katsuhisa MORITA 
-* Iori Azuma  
+* Katsuhisa MORITA
+* Iori AZUMA
 
 # Bug Report  
 If you would like to report any bugs about this package, don't hesitate to create an issue on github here, or email me:  

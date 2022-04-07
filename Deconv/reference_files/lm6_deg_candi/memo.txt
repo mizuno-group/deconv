@@ -1,0 +1,7 @@
+220331
+lm6_deg_candi.pkl
+target : (51463, 82) without any processing
+lm6 : (51463, 82) log2 --> quantile
+narrow_intersection() --> 51369
+number=500,limit_CV=1,limit_FC=1.2,log2=False
+For cells other than neutrophil and NK, the corresponding DEGs could not be obtained in sufficient quantities.
