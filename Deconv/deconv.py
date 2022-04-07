@@ -25,11 +25,15 @@ class Deconvolution():
         self.__processing = processing
         self.method_dict={'elasticnet':fitter.fit_ElasticNet,'NuSVR':fitter.fit_NuSVR,'NNLS':fitter.fit_NNLS}
     
-    ### setter / getter ###
     ### main ###
     def preprocessing():
+        return
 
+    def deg():
+        return
+    
     def fit():
+        return
 
 
     def do_fit(self,file_dat='',file_ref='',method='elasticnet',prints=True,combat=False,nonpara=False,number_of_repeats=1,
@@ -103,18 +107,16 @@ class Deconvolution():
         except:
             self.__mix_data = file_dat
 
-            
     def __set_reference_data(self,file_ref=''):
         if len(file_ref)==0:
             dirname = os.path.dirname(os.path.abspath('__file__'))
             file_ref = dirname+'/reference_files/ref_dcq.csv'
-            print('dcq reference is used')
+            print('DCQ reference is used')
         try:
             self.__reference_data = pd.read_csv(file_ref,index_col=0)
         except:
             self.__reference_data = file_ref
 
-    
     def get_res(self):
         return self.__res
     
@@ -122,7 +124,7 @@ class Deconvolution():
         return self.__mix_data, self.__reference_data
 
 
-    ### processing method ###
+    ### processing method ### ここら辺はutilsに移行する
     def __calc_median_same_gene(self,df):
         df = df.dropna()
         df2 = pd.DataFrame()
