@@ -14,7 +14,7 @@ from tqdm import tqdm
 from combat.pycombat import pycombat
 import matplotlib.pyplot as plt
 
-def annotation(df,ref_df):
+def annotation(df,ref_df, places=[0, 1]):
     """
     annotate row IDs to gene names
 
@@ -22,12 +22,13 @@ def annotation(df,ref_df):
     ----------
     df : a dataframe to be analyzed
     ref_df : two rows of dataframe. e.g. ["Gene stable ID","MGI symbol"]
+    places : list of positions of target rows in the ref_df
 
     """
     ref_col = ref_df.columns.tolist()
     print("reference information :",ref_col)
-    ids = ref_df[ref_col[0]].tolist()
-    symbols = ref_df[ref_col[1]].tolist()
+    ids = ref_df[ref_col[places[0]]].tolist()
+    symbols = ref_df[ref_col[places[1]]].tolist()
     
     total_id = [x.split(".")[0] for x in df.index.tolist()] # ENSMUSG00000000049.12 --> ENSMUSG00000000049
     total_res = [None]*len(df)
@@ -277,3 +278,4 @@ def df_median(df,sep="_"):
     df_c.columns=[i.split(sep)[0] for i in list(df_c.columns)]
     df_c = df_c.groupby(level=0,axis=1).median()
     return df_c
+

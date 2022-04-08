@@ -15,13 +15,13 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import random
 
-from _utils import processing
+from _utils import utils
 
 class Deg_ttest():
     def __init__(self):
         self.df_mix=pd.DataFrame()
         self.df_all=pd.DataFrame()
-        self.__processing=processing
+        self.__processing=utils
         
     ### main ###
     def set_data(self,df_mix,df_all):
