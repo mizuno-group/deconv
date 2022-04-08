@@ -75,14 +75,25 @@ class Deconvolution():
             dat.normalize(methods=norm_method_list)
         self.__reference_data = dat.res
 
-    def deg(self,method:str="ttest",sep:str="_",number=150,limit_CV=1,limit_FC=1.5,log2=False,plot=False):
+    def deg(self,method:str="ttest",
+            sep:str="_",number=150,limit_CV=1,limit_FC=1.5,log2=False,
+            plot=False):
         dat = deg.Deg()
         dat.set_method(method=method)
-        dat.set_data(df_mix="",df_all="")
+        dat.set_data(self.__mix_data,self.__reference_data)
         dat.create_ref(sep=sep,number=number,limit_CV=limit_CV,limit_FC=limit_FC,log2=log2,plot=plot)
         self.final_reference_data=dat.final_ref
     
-    def fit(self):
+    def fit(self,method:str="",
+            number_of_repeats=1,
+            alpha=1,l1_ratio=0.05,
+            nu=[0.25,0.5,0.75],
+            max_iter=100000,
+            combat=False,nonpara=False):
+        dat=fitter.Fitter()
+        dat.set_method(method=method)
+        dat.set_data(self.__mix_data,self.final_reference_data)
+        dat.fit(number_of_repeats=number_of_repeats,alpha=alpha,l1_ratio=l1_ratio,nu=nu,max_iter=max_iter,combat=combat,nonpara=nonpara)
         return
 
     ### in/out put control ###
