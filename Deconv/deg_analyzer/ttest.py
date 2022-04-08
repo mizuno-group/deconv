@@ -23,7 +23,7 @@ class Deg_ttest(abst.Deg_abst):
         self.seps=[]
         
     ### main ###
-    def deg_extraction(self,sep_ind="_",number=150,q_limit=0.05,limit_CV=0.1,base="logFC"):
+    def deg_extraction(self,sep_ind="_",number=150,q_limit=0.05,limit_CV=0.1,limit_FC=1,base="logFC"):
         df_c = copy.deepcopy(self.df_ref)
         cluster, self.samples = super()._sepmaker(df=df_c,delimiter=sep_ind)
         self.__make_seplist(sep=cluster) # prepare self.seps
@@ -35,12 +35,12 @@ class Deg_ttest(abst.Deg_abst):
             self.__DEG_extraction_qval(q_limit=q_limit)
             self.df_logFC = super()._logFC(self.df_target,self.df_else)
             self.df_CV = super()._calc_CV(self.df_target)
-            pickup_genes = self._selection(self.df_logFC, self.df_CV,number=number,limit_CV=limit_CV,base=base)
+            pickup_genes = self._selection(self.df_logFC, self.df_CV,number=number,limit_CV=limit_CV,limit_FC=limit_FC,base=base)
             ap(pickup_genes)
         self._pickup_genes_df=pd.DataFrame(self.pickup_genes_list).T
         self.pickup_genes_dic = dict(zip(self.samples,self.pickup_genes_list))
     
-    def create_ref(self,sep="_",number=200,limit_CV=1,q_limit=0.05,log2=False,base="logFC",plot=False,**kwargs):
+    def create_ref(self,sep="_",number=200,limit_CV=1,limit_FC=1,q_limit=0.05,log2=False,base="logFC",plot=False,**kwargs):
         """
         create reference dataframe which contains signatures for each cell
         """
@@ -48,7 +48,7 @@ class Deg_ttest(abst.Deg_abst):
         if log2:
             self.df_ref = copy.deepcopy(np.log2(self.df_ref+1))
         # DEG extraction
-        self.deg_extraction(sep_ind=sep,number=number,q_limit=q_limit,limit_CV=limit_CV,base=base)
+        self.deg_extraction(sep_ind=sep,number=number,q_limit=q_limit,limit_CV=limit_CV,limit_FC=limit_FC,base=base)
         signature = super().get_res(self._pickup_genes) # union of each reference cell's signatures
         sig_ref = ref_inter_df.loc[signature,:]
         final_ref = super()._df_median(sig_ref,sep=sep)
@@ -88,7 +88,7 @@ class Deg_ttest(abst.Deg_abst):
             pass
         self.random_ref = random_ref
     '''
-    
+
     ### processing ###
     def narrow_intersection(self):
         """take intersection genes"""

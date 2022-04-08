@@ -100,7 +100,7 @@ class Fitter():
     def _fit_ElasticNet(self,ref,dat,alpha=1,l1_ratio=0.05,max_iter=100000,**kwargs):
         model = ElasticNet(alpha=alpha, l1_ratio=l1_ratio, max_iter=max_iter, tol=1e-5, random_state=None, fit_intercept=True)
         model.fit(ref,dat)
-        print("model score: ".format(model.score(ref,dat)))
+        print("model score: {}".format(model.score(ref,dat)))
         res_mat = pd.DataFrame(model.coef_,index=dat.columns, columns=ref.columns)
         return res_mat
 
