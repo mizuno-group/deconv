@@ -12,7 +12,7 @@ import pandas as pd
 import numpy as np
 from sklearn.preprocessing import MinMaxScaler
 
-import utils
+from . import utils
 
 class Normalization():
     
@@ -47,11 +47,11 @@ class Normalization():
             raise ValueError("!! Set method first !!")
         df_tmp = copy.deepcopy(self.data)
         for i,m in enumerate(self.methods):
-            #print(i+1,":",m)
-            df_tmp = self.do_norm(m, df_tmp)
+            print(i+1,":",m)
+            df_tmp = self._do_norm(df_tmp,method=m)
         self.res=df_tmp
 
-    def do_norm(self,df,method:str=""):
+    def _do_norm(self,df,method:str=""):
         """conduct normalization"""
         if self.data is None:
             raise ValueError("!! Set data first !!")

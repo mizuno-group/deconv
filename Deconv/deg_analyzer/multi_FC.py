@@ -10,7 +10,7 @@ import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-from deg_analyzer import abst
+from . import abst
 
 class Deg_Multi_FC(abst.Deg_abst):
     def __init__(self):
@@ -48,14 +48,13 @@ class Deg_Multi_FC(abst.Deg_abst):
                     pass
                 else:
                     self.df_else = df_c[o]
-                    self.__logFC()
-                    df_logFC = self.df_logFC
+                    df_logFC = super()._logFC(self.df_target,self.df_else)
                     df_logFC.columns = [o]
                     self.tmp_summary = pd.concat([self.tmp_summary,df_logFC],axis=1)
             tmp_min = self.tmp_summary.T.min()
             self.df_minFC = pd.DataFrame(tmp_min)
-            self.__calc_CV()
-            pickup_genes = self.__selection(self.minFC,self.df_CV,number=number,limit_CV=limit_CV,limit_FC=limit_FC)
+            self.df_CV = super()._calc_CV(self.df_target)
+            pickup_genes = self._selection(self.df_minFC,self.df_CV,number=number,limit_CV=limit_CV,limit_FC=limit_FC)
             self.pickup_genes_list.append(pickup_genes)
             self.min_FC = pd.concat([self.min_FC,tmp_min],axis=1)
         self.min_FC.columns = sorted(list(set(immunes)))
@@ -64,24 +63,43 @@ class Deg_Multi_FC(abst.Deg_abst):
         #curate = [[i for i in t if str(i)!='nan'] for t in self.pickup_genes_list]
         #self.deg_dic = dict(zip(list(set(immunes)),curate))
     
-    def create_ref(self,sep="_",number=200,limit_CV=1,limit_FC=1.5,log2=False,plot=False):
+    def create_ref(self,sep="_",number=200,limit_CV=1,limit_FC=1.5,log2=False,plot=False,**kwargs):
         """
         create reference dataframe which contains signatures for each cell
 
         """
-        ref_inter_df = copy.deepcopy(self.df_all)
-        df2 = copy.deepcopy(self.df_all)
+        ref_inter_df = copy.deepcopy(self.df_ref)
         if log2:
-            df2 = np.log2(df2+1)
-        self.df_all = df2
+            self.df_ref = copy.deepcopy(np.log2(self.df_ref+1))
         # DEG extraction
         self.deg_extraction(sep_ind=sep,number=number,limit_CV=limit_CV,limit_FC=limit_FC)
-        signature = self.get_res() # union of each reference cell's signatures
+        signature = super().get_res(self._pickup_genes) # union of each reference cell's signatures
         sig_ref = ref_inter_df.loc[signature]
-        final_ref = self.__df_median(sig_ref,sep=sep)
+        final_ref = super()._df_median(sig_ref,sep=sep)
         if plot:
             print("signature genes :",len(signature))
             sns.clustermap(final_ref,col_cluster=False,z_score=0)
             plt.show()
         self.final_ref = final_ref
 
+    def narrow_intersection(self):
+        """take intersection genes"""
+        self.df_mix, self.df_ref = super()._intersection_index(self.df_mix,self.df_ref)
+        
+    def _selection(self,df_FC,df_CV,number=50,limit_CV=0.1,limit_FC=1.5):
+        df_CV=self.df_CV
+        df_FC=df_FC.sort_values(0,ascending=False)
+        genes=df_FC.index.tolist()
+        pickup_genes=[]
+        ap = pickup_genes.append
+        i=0
+        while len(pickup_genes)<number:
+            if len(genes)<i+1:
+                pickup_genes = pickup_genes+[np.nan]*number
+                print('not enough genes picked up')
+            elif df_CV.iloc[i,0] < limit_CV and df_FC.iloc[i,0] > limit_FC:
+                ap(genes[i])
+            i+=1
+        else:
+            self._pickup_genes = self._pickup_genes + pickup_genes
+            return pickup_genes

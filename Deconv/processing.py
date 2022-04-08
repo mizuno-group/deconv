@@ -16,7 +16,7 @@ from tqdm import tqdm
 from combat.pycombat import pycombat
 import matplotlib.pyplot as plt
 
-from _utils import utils, normalization, transformation
+from ._utils import utils, normalization, transformation
 
 class Processing():
 
@@ -40,9 +40,10 @@ class Processing():
         if batch:
             raw_batch = [t.split(split)[0] for t in self.data.columns.tolist()]
             batch_list = pd.Series(raw_batch).astype("category").cat.codes.tolist()
-            self.res = utils.array_imputer(np.log2(self.res)+1,threshold=threshold,strategy=strategy,trim=trim,batch=True,lst_batch=batch_list,trim_red=False)
+            res = utils.array_imputer(np.log2(self.res)+1,threshold=threshold,strategy=strategy,trim=trim,batch=True,lst_batch=batch_list,trim_red=False)
         else:
-            self.res = utils.array_imputer(np.log2(self.res)+1,threshold=threshold,strategy=strategy,trim=trim,batch=False)
+            res = utils.array_imputer(np.log2(self.res)+1,threshold=threshold,strategy=strategy,trim=trim,batch=False)
+        self.res=(res**2)-1 # back to linear
 
     def combat(self, batch_lst_lst=[[],[]],plot=False):
         self.res = utils.multi_batch_norm(self.res,batch_lst_lst=batch_lst_lst,do_plots=plot)

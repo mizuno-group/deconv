@@ -15,18 +15,18 @@ from sklearn.svm import NuSVR
 import scipy as sp
 from combat.pycombat import pycombat
 
-from _utils import utils
+from ._utils import utils
 
 class Fitter():
 
     def __init__(self):
         self.df_mix=pd.DataFrame()
         self.df_ref=pd.DataFrame()
-        self.__res=pd.DataFrame()
+        self.res=pd.DataFrame()
         self.__method=None
         self.__method_dict={'elasticnet':self._fit_ElasticNet,'NuSVR':self._fit_NuSVR,'NNLS':self._fit_NNLS}
 
-    def set_method(self, method=""):
+    def set_method(self, method:str=""):
         """set fitting method"""
         self.__method = self.__method_dict.get(method, None)
         if self.__method is None:
@@ -71,7 +71,7 @@ class Fitter():
               max_iter=100000):
         try:
             for i in range(number_of_repeats):
-                res_mat = self.method(self.__reference_data,self.__mix_data,alpha=alpha,l1_ratio=l1_ratio,nu=nu,max_iter=max_iter)
+                res_mat = self.__method(self.df_ref,self.df_mix,alpha=alpha,l1_ratio=l1_ratio,nu=nu,max_iter=max_iter)
                 # sum up
                 if i == 0:
                     res = res_mat
@@ -80,32 +80,32 @@ class Fitter():
             res = res / number_of_repeats
         except:
             raise NotImplementedError
-        self.__res=res       
+        self.res=res       
 
     def combat_correction(self,nonpara=False):
         """combat correction between deconvolution result and sample transcriptome"""
-        batch_list = [0]*len(self.__res.index) + [1]*len(self.__res.index)
+        batch_list = [0]*len(self.res.index) + [1]*len(self.res.index)
         if len(batch_list)<20:
             print('*** sample size is small ***')
             print('combat correction is not recommended')
-        mix_data_estimated = np.dot(np.array(self.__res),np.array(self.__reference_data.T))
-        mix_data_estimated = pd.DataFrame(mix_data_estimated.T,index=list(self.__mix_data.index))
-        mix_data_sum = pd.concat([self.__mix_data,mix_data_estimated],axis=1)
+        mix_data_estimated = np.dot(np.array(self.res),np.array(self.df_ref.T))
+        mix_data_estimated = pd.DataFrame(mix_data_estimated.T,index=list(self.df_mix.index))
+        mix_data_sum = pd.concat([self.df_mix,mix_data_estimated],axis=1)
         mix_data_corrected = pycombat(mix_data_sum,batch_list,par_prior=not nonpara)
-        mix_data_corrected = mix_data_corrected.iloc[:,:len(self.__res.index)]
+        mix_data_corrected = mix_data_corrected.iloc[:,:len(self.res.index)]
         self.__mix_data = mix_data_corrected
         return        
 
     # elasticnet    
-    def _fit_ElasticNet(ref,dat,alpha=1,l1_ratio=0.05,max_iter=100000,**kwargs):
+    def _fit_ElasticNet(self,ref,dat,alpha=1,l1_ratio=0.05,max_iter=100000,**kwargs):
         model = ElasticNet(alpha=alpha, l1_ratio=l1_ratio, max_iter=max_iter, tol=1e-5, random_state=None, fit_intercept=True)
         model.fit(ref,dat)
-        print(model.score(ref,dat))
+        print("model score: ".format(model.score(ref,dat)))
         res_mat = pd.DataFrame(model.coef_,index=dat.columns, columns=ref.columns)
         return res_mat
 
     # NuSVR
-    def _fit_NuSVR(ref,dat,nu=[0.25,0.5,0.75],max_iter=100000,**kwargs):
+    def _fit_NuSVR(self,ref,dat,nu=[0.25,0.5,0.75],max_iter=100000,**kwargs):
         tune_parameters = [{'kernel': ['linear'],
                             'nu':nu,
                             'gamma': ['auto'],
@@ -122,7 +122,7 @@ class Fitter():
         return res_mat   
 
     # NNLS
-    def _fit_NNLS(ref,dat,**kwargs):
+    def _fit_NNLS(self,ref,dat,**kwargs):
         A = np.array(ref)
         res_mat = pd.DataFrame(index=dat.columns, columns=ref.columns)
         for i in range(len(list(dat.columns))):

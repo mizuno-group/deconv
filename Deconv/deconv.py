@@ -13,10 +13,10 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import copy
 
-import processing
-import deg
-import fitter
-from _utils import utils
+from . import processing
+from . import deg
+from . import fitter
+from ._utils import utils
 
 class Deconvolution():
     ### initialize ###
@@ -25,8 +25,6 @@ class Deconvolution():
         self.__reference_data=pd.DataFrame()
         self.final_reference_data=pd.DataFrame()
         self.__res=[]
-        self.__processing = utils
-        self.method_dict={'elasticnet':fitter.fit_ElasticNet,'NuSVR':fitter.fit_NuSVR,'NNLS':fitter.fit_NNLS}
     
     ### main ###
     def set_data(self,dat=pd.DataFrame(),ref=pd.DataFrame()):
@@ -46,14 +44,19 @@ class Deconvolution():
         dat.set_data(self.__mix_data)
         if len(places)>0:
             dat.annotation(df_ref, places=places)
+            print("annotation")
         if trimming:
             dat.trimming(threshold=threshold, strategy=strategy, trim=trim, batch=batch, split=split)
+            print("trimming")
         if combat:
             dat.combat(batch_lst=batch_lst,plot=plot)
+            print("combat")
         if len(trans_method)>0:
             dat.transform(method=trans_method)
+            print("tranformation")
         if len(norm_method_list)>0:
             dat.normalize(methods=norm_method_list)
+            print("normalization")
         self.__mix_data = dat.res
 
     def preprocessing_ref(self, df_ref=None, places:list=[],                           
@@ -76,12 +79,12 @@ class Deconvolution():
         self.__reference_data = dat.res
 
     def deg(self,method:str="ttest",
-            sep:str="_",number=150,limit_CV=1,limit_FC=1.5,log2=False,
-            plot=False):
+            sep:str="_",number=150,limit_CV=1,limit_FC=1.5,q_limit=0.05,
+            log2=False,plot=False):
         dat = deg.Deg()
         dat.set_method(method=method)
         dat.set_data(self.__mix_data,self.__reference_data)
-        dat.create_ref(sep=sep,number=number,limit_CV=limit_CV,limit_FC=limit_FC,log2=log2,plot=plot)
+        dat.create_ref(sep=sep,number=number,limit_CV=limit_CV,limit_FC=limit_FC,q_limit=q_limit,log2=log2,plot=plot)
         self.final_reference_data=dat.final_ref
     
     def fit(self,method:str="",
@@ -94,7 +97,7 @@ class Deconvolution():
         dat.set_method(method=method)
         dat.set_data(self.__mix_data,self.final_reference_data)
         dat.fit(number_of_repeats=number_of_repeats,alpha=alpha,l1_ratio=l1_ratio,nu=nu,max_iter=max_iter,combat=combat,nonpara=nonpara)
-        return
+        self.__res=dat.res
 
     ### in/out put control ###
     def __set_mix_data(self,dat=pd.DataFrame()):

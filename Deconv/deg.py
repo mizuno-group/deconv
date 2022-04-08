@@ -12,10 +12,10 @@ from scipy import stats as st
 import matplotlib.pyplot as plt
 import statsmodels.stats.multitest as sm
 
-from deg_analyzer import ttest
-from deg_analyzer import multi_FC
+from .deg_analyzer import ttest
+from .deg_analyzer import multi_FC
 
-from _utils import utils
+from ._utils import utils
 
 class Deg():
     ### init ###
@@ -23,7 +23,8 @@ class Deg():
         self.df_mix=pd.DataFrame()
         self.df_ref=pd.DataFrame()
         self.final_ref=pd.DataFrame()
-        self.__method_dict={"ttest":ttest.Deg_ttest(),"multiFC":multi_FC.Deg_Multi_FC()}
+        self.__deg_class=None
+        self.__method_dict={"ttest":ttest.Deg_ttest,"multiFC":multi_FC.Deg_Multi_FC}
     
     ### main ###
     def set_method(self,method="ttest"):
@@ -38,12 +39,13 @@ class Deg():
         self.df_mix = df_mix
         self.df_ref = df_ref
             
-    def create_ref(self,sep="_",number=200,limit_CV=1,limit_FC=1.5,log2=False,plot=False):
+    def create_ref(self,sep="_",number=200,limit_CV=1,limit_FC=1.5,q_limit=0.05,log2=False,plot=False):
         """
         create reference dataframe which contains signatures for each cell
 
         """
-        self.__deg_class.set_data(df_mix=self.df_mix,df_all=self.df_ref)
-        self.__def_class.narrow_intersection()
-        self.__deg_class.create_ref(sep=sep,number=number,limit_CV=limit_CV,limit_FC=limit_FC,log2=False)
-        self.final_ref = self.__deg_class.final_ref
+        dat=self.__deg_class()
+        dat.set_data(self.df_mix,self.df_ref)
+        dat.narrow_intersection()
+        dat.create_ref(sep=sep,number=number,limit_CV=limit_CV,limit_FC=limit_FC,q_limit=q_limit,log2=log2,plot=plot)
+        self.final_ref = dat.final_ref
