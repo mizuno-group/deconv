@@ -5,9 +5,11 @@ Created on Mon Aug  3 13:55:45 2020
 @author: I.Azuma, K.Morita
 """
 
+import copy
+import os
+
 import pandas as pd
 import numpy as np
-import os
 from combat.pycombat import pycombat
 
 from . import processing
@@ -21,7 +23,7 @@ class Deconvolution():
         self.__mix_data=pd.DataFrame()
         self.__reference_data=pd.DataFrame()
         self.final_reference_data=pd.DataFrame()
-        self.__res=[]
+        self.__res=pd.DataFrame()
     
     ### main ###
     def set_data(self,dat=pd.DataFrame(),ref=pd.DataFrame()):
@@ -96,8 +98,8 @@ class Deconvolution():
         dat.fit(number_of_repeats=number_of_repeats,alpha=alpha,l1_ratio=l1_ratio,nu=nu,max_iter=max_iter,combat=combat,nonpara=nonpara)
         self.__res=dat.res
 
-    def plot_res(self,sort_index:list=[], control_names:list=["control, ctrl"], row_n:int=2,col_n:int=3):
-        plotter.plot_immune_box(self.__res.T,sort_index=sort_index,control_names=control_names,row_n=row_n,col_n=col_n)
+    def plot_res(self,sort_index:list=[], control_names:list=["control, ctrl"], row_n:int=2,col_n:int=3,sep="_"):
+        plotter.plot_immune_box(copy.deepcopy(self.__res),sort_index=sort_index,control_names=control_names,row_n=row_n,col_n=col_n,sep=sep)
 
     ### in/out put control ###
     def __set_mix_data(self,dat=pd.DataFrame()):
@@ -120,17 +122,3 @@ class Deconvolution():
         return self.__mix_data, self.__reference_data, self.final_reference_data
 
     ###  ###
-    def __combat_correction(self,nonpara=False):
-        batch_list = [0]*len(self.__res.index) + [1]*len(self.__res.index)
-        if len(batch_list)<20:
-            print('*** sample size is small ***')
-            print('combat correction is not recommended')
-        mix_data_estimated = np.dot(np.array(self.__res),np.array(self.__reference_data.T))
-        mix_data_estimated = pd.DataFrame(mix_data_estimated.T,index=list(self.__mix_data.index))
-        mix_data_sum = pd.concat([self.__mix_data,mix_data_estimated],axis=1)
-        mix_data_corrected = pycombat(mix_data_sum,batch_list,par_prior=not nonpara)
-        mix_data_corrected = mix_data_corrected.iloc[:,:len(self.__res.index)]
-        self.__mix_data = mix_data_corrected
-        return
-
-

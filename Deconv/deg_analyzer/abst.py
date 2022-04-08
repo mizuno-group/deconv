@@ -110,7 +110,7 @@ class Deg_abst():
         """
         CV : coefficient of variation
         """
-        df_CV = np.std(df_target.T) / np.mean(df_target.T)
+        df_CV = np.std(df_target,axis=1) / np.mean(df_target,axis=1)
         df_CV = pd.DataFrame(df_CV)
         df_CV.index = df_target.index
         df_CV = df_CV.replace(np.inf,np.nan)

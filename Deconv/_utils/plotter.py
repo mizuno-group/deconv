@@ -41,11 +41,13 @@ def plot_box(melt_df):
     plt.show()
 
 
-def plot_immune_box(df,sort_index:list=[], control_names:list=["control, ctrl"], row_n:int=2,col_n:int=3):
+def plot_immune_box(df,sort_index:list=[], control_names:list=["control, ctrl"], row_n:int=2,col_n:int=3, sep="_"):
     """plot box plot and point plot of dataframe"""
     immunes = df.columns.tolist()
-    df.index = [i.split("_")[0] for i in df.index]
-    df = df.loc[:,sort_index]
+    df.index = [i.split(sep)[0] for i in df.index]
+    if len(sort_index)==0:
+        sort_index=sorted(list(set(df.index.tolist())))
+    df = df.loc[sort_index,:]
     fig = plt.figure(figsize=(5*col_n,5*row_n))
     for i,immune in enumerate(immunes):
         df_melt = pd.melt(df[[immune]].T)
