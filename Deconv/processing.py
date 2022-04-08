@@ -5,6 +5,7 @@ Created on Mon Feb  1 21:00:52 2021
 @author: K.Morita, I.Azuma
 """
 
+from ctypes import util
 import numpy as np
 import pandas as pd
 from sklearn.impute import SimpleImputer
@@ -34,6 +35,17 @@ class Processing():
 
         """
         self.res = utils.annotation(self.res, ref_df, places=places)
+
+    def trimming(self,threshold=0.9,strategy="median",trim=1.0,batch=False,split="_"):
+        if batch:
+            raw_batch = [t.split(split)[0] for t in self.data.columns.tolist()]
+            batch_list = pd.Series(raw_batch).astype("category").cat.codes.tolist()
+            self.res = utils.array_imputer(np.log2(self.res)+1,threshold=threshold,strategy=strategy,trim=trim,batch=True,lst_batch=batch_list,trim_red=False)
+        else:
+            self.res = utils.array_imputer(np.log2(self.res)+1,threshold=threshold,strategy=strategy,trim=trim,batch=False)
+
+    def combat(self, batch_lst_lst=[[],[]],plot=False):
+        self.res = utils.multi_batch_norm(self.res,batch_lst_lst=batch_lst_lst,do_plots=plot)
 
     def normalize(self, methods:list=[]):
         """normalize the target data with the selected methods"""

@@ -14,7 +14,7 @@ from tqdm import tqdm
 from combat.pycombat import pycombat
 import matplotlib.pyplot as plt
 
-def annotation(df,ref_df, places=[0, 1]):
+def annotation(df,ref_df, places:list=[0, 1]):
     """
     annotate row IDs to gene names
 
@@ -25,28 +25,19 @@ def annotation(df,ref_df, places=[0, 1]):
     places : list of positions of target rows in the ref_df
 
     """
-    ref_col = ref_df.columns.tolist()
-    print("reference information :",ref_col)
-    ids = ref_df[ref_col[places[0]]].tolist()
-    symbols = ref_df[ref_col[places[1]]].tolist()
-    
-    total_id = [x.split(".")[0] for x in df.index.tolist()] # ENSMUSG00000000049.12 --> ENSMUSG00000000049
-    total_res = [None]*len(df)
-    
-    id_set = set(ids)
-    for i in tqdm(range(len(total_id))):
-        if total_id[i] in id_set:
-            j = ids.index(total_id[i])
-            total_res[i] = symbols[j]
-        else:
-            pass
-    
-    total_df = copy.deepcopy(df)
-    total_df["symbol"] = total_res # add new col
-    drop_df = total_df.dropna() # remove rows which has no annotation
-    group_df = drop_df.groupby("symbol").median() # take median value for duplication rows
-    
-    return group_df
+    ref_df_dropna = ref_df_dropna.loc[:,places].dropna(how='any', axis=0)
+    id_lst = ref_df.iloc[:,0].tolist()
+    symbol_lst = ref_df.iloc[:,1].tolist()
+    conv_dict = dict(list(zip(id_lst, symbol_lst)))
+    id_lst_raw = [str(x).split(".")[0] for x in df.index.tolist()] # ENSMUSG00000000049.12 --> ENSMUSG00000000049
+    symbol_lst_new = [conv_dict.get(x, np.nan) for x in id_lst_raw]
+    df_conv = copy.deepcopy(df)
+    df_conv["symbol"] = symbol_lst_new # add new col
+    df_conv = df_conv.dropna(subset=["symbol"])
+    df_conv = df_conv.groupby("symbol").median() # take median value for duplication rows
+    df_conv.index=df_conv["symbol"].tolist()
+    del df_conv["symbol"]
+    return df_conv
 
 def array_imputer(df,threshold=0.9,strategy="median",trim=1.0,batch=False,lst_batch=[], trim_red=True):
     """

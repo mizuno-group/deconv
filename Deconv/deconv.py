@@ -36,25 +36,47 @@ class Deconvolution():
         if len(self.__reference_data)==0:
             self.__set_reference_data()
         
-    def preprocessing_mix(self, norm_method_list:list=[], trans_method:str=""):
+    def preprocessing_mix(self, df_ref=None, places:list=[],          
+                          trimming=True, threshold=0.9, strategy="median", trim=1.0, batch=False, split="_",
+                          combat=False, batch_lst=[[],[]], plot=False,
+                          trans_method:str="", norm_method_list:list=[],):
         """preprocessing for mix data"""
         dat = processing.Processing()
         dat.set_data(self.__mix_data)
-        dat.transform(method=trans_method)
-        dat.normalize(methods=norm_method_list)
+        if len(places)>0:
+            dat.annotation(df_ref, places=places)
+        if trimming:
+            dat.trimming(threshold=threshold, strategy=strategy, trim=trim, batch=batch, split=split)
+        if combat:
+            dat.combat(batch_lst=batch_lst,plot=plot)
+        if len(trans_method)>0:
+            dat.transform(method=trans_method)
+        if len(norm_method_list)>0:
+            dat.normalize(methods=norm_method_list)
         self.__mix_data = dat.res
 
-    def preprocessing_ref(self, norm_method_list:list=[], trans_method:str=""):
+    def preprocessing_ref(self, df_ref=None, places:list=[],                           
+                          trimming=True, threshold=0.9, strategy="median", trim=1.0, batch=False, split="_",
+                          combat=False, batch_lst_lst=[[],[]], plot=False,
+                          trans_method:str="", norm_method_list:list=[],):
         """preprocessing for reference data"""
         dat = processing.Processing()
         dat.set_data(self.__reference_data)
-        dat.transform(method=trans_method)
-        dat.normalize(methods=norm_method_list)
+        if len(places)>0:
+            dat.annotation(df_ref, places=places)
+        if trimming:
+            dat.trimming(threshold=threshold, strategy=strategy, trim=trim, batch=batch, split=split)
+        if combat:
+            dat.combat(batch_lst_lst=batch_lst_lst,plot=plot)
+        if len(trans_method)>0:
+            dat.transform(method=trans_method)
+        if len(norm_method_list)>0:
+            dat.normalize(methods=norm_method_list)
         self.__reference_data = dat.res
 
     def deg(self, method:str="ttest",number=150,limit_CV=1,limit_FC=1.5,log2=False):
         dat = deg.Deg()
-        dat.set_method(method="multiFC")
+        dat.set_method(method=method)
         dat.set_data(df_mix="",df_all="")
         dat.pre_processing(do_ann=False,ann_df=None,do_log2=True,do_quantile=True,do_trimming=False,do_drop=True)
         dat.narrow_intersec()

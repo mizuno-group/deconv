@@ -12,8 +12,8 @@ from scipy import stats as st
 import matplotlib.pyplot as plt
 import statsmodels.stats.multitest as sm
 
-from DEG_analyzer import deg_ttest as dt
-from DEG_analyzer import deg_multi_FC as dmf
+from deg_analyzer import deg_ttest
+from deg_analyzer import deg_multi_FC
 
 import processing
 
@@ -30,7 +30,7 @@ class Deg():
         self.seps=[]
         self.__pickup_genes=[]
         self.__pickup_genes_df=pd.DataFrame()
-        self.__method_dict={"ttest":dt.Deg_ttest(),"multiFC":dmf. Deg_Multi_FC()}
+        self.__method_dict={"ttest":deg_ttest.Deg_ttest(),"multiFC":deg_multi_FC. Deg_Multi_FC()}
         self.__processing=processing
     
     ### main ###
