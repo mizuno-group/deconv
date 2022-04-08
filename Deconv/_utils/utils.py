@@ -226,7 +226,6 @@ def log2(df):
     f_add = lambda x: x+1
     log_df = df.apply(f_add)
     log_df = np.log2(log_df)
-    
     return log_df
 
 def low_cut(df,threshold=1.0):

@@ -23,6 +23,7 @@ class Deconvolution():
     def __init__(self):
         self.__mix_data=pd.DataFrame()
         self.__reference_data=pd.DataFrame()
+        self.final_reference_data=pd.DataFrame()
         self.__res=[]
         self.__processing = utils
         self.method_dict={'elasticnet':fitter.fit_ElasticNet,'NuSVR':fitter.fit_NuSVR,'NNLS':fitter.fit_NNLS}
@@ -74,14 +75,12 @@ class Deconvolution():
             dat.normalize(methods=norm_method_list)
         self.__reference_data = dat.res
 
-    def deg(self, method:str="ttest",number=150,limit_CV=1,limit_FC=1.5,log2=False):
+    def deg(self,method:str="ttest",sep:str="_",number=150,limit_CV=1,limit_FC=1.5,log2=False,plot=False):
         dat = deg.Deg()
         dat.set_method(method=method)
         dat.set_data(df_mix="",df_all="")
-        dat.pre_processing(do_ann=False,ann_df=None,do_log2=True,do_quantile=True,do_trimming=False,do_drop=True)
-        dat.narrow_intersec()
-        dat.create_ref(sep="_",number=150,limit_CV=1,limit_FC=1.5,log2=False)
-        return
+        dat.create_ref(sep=sep,number=number,limit_CV=limit_CV,limit_FC=limit_FC,log2=log2,plot=plot)
+        self.final_reference_data=dat.final_ref
     
     def fit(self):
         return
@@ -104,7 +103,7 @@ class Deconvolution():
         return self.__res
     
     def get_data(self):
-        return self.__mix_data, self.__reference_data
+        return self.__mix_data, self.__reference_data, self.final_reference_data
 
     ###  ###
     def __combat_correction(self,nonpara=False):
