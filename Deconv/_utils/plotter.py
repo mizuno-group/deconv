@@ -45,7 +45,7 @@ def plot_immune_box(df,sort_index:list=[], control_names:list=["control, ctrl"],
     """plot box plot and point plot of dataframe"""
     immunes = df.columns.tolist()
     df.index = [i.split("_")[0] for i in df.index]
-    df = df.loc[sort_index]
+    df = df.loc[:,sort_index]
     fig = plt.figure(figsize=(5*col_n,5*row_n))
     for i,immune in enumerate(immunes):
         df_melt = pd.melt(df[[immune]].T)

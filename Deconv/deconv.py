@@ -9,14 +9,11 @@ import pandas as pd
 import numpy as np
 import os
 from combat.pycombat import pycombat
-import seaborn as sns
-import matplotlib.pyplot as plt
-import copy
 
 from . import processing
 from . import deg
 from . import fitter
-from ._utils import utils
+from ._utils import plotter
 
 class Deconvolution():
     ### initialize ###
@@ -98,6 +95,9 @@ class Deconvolution():
         dat.set_data(self.__mix_data,self.final_reference_data)
         dat.fit(number_of_repeats=number_of_repeats,alpha=alpha,l1_ratio=l1_ratio,nu=nu,max_iter=max_iter,combat=combat,nonpara=nonpara)
         self.__res=dat.res
+
+    def plot_res(self,sort_index:list=[], control_names:list=["control, ctrl"], row_n:int=2,col_n:int=3):
+        plotter.plot_immune_box(self.__res.T,sort_index=sort_index,control_names=control_names,row_n=row_n,col_n=col_n)
 
     ### in/out put control ###
     def __set_mix_data(self,dat=pd.DataFrame()):
