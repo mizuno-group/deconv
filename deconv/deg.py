@@ -39,13 +39,16 @@ class Deg():
         self.df_mix = df_mix
         self.df_ref = df_ref
             
-    def create_ref(self,sep="_",number=200,limit_CV=1,limit_FC=1.5,q_limit=0.05,log2=False,plot=False):
+    def create_ref(self,sep="_",number=200,limit_CV=1,limit_FC=1.5,q_limit=0.05,log2=False,plot=False,intersection=True,prints=True):
         """
         create reference dataframe which contains signatures for each cell
 
         """
         dat=self.__deg_class()
         dat.set_data(self.df_mix,self.df_ref)
-        dat.narrow_intersection()
-        dat.create_ref(sep=sep,number=number,limit_CV=limit_CV,limit_FC=limit_FC,q_limit=q_limit,log2=log2,plot=plot)
+        if intersection:
+            dat.narrow_intersection()
+        dat.create_ref(sep=sep,number=number,limit_CV=limit_CV,limit_FC=limit_FC,q_limit=q_limit,log2=log2,plot=plot,prints=prints)
         self.final_ref = dat.final_ref
+
+    

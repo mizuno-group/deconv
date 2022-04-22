@@ -22,7 +22,6 @@ class Deconvolution():
     def __init__(self):
         self.__mix_data=pd.DataFrame()
         self.__reference_data=pd.DataFrame()
-        self.final_reference_data=pd.DataFrame()
         self.__res=pd.DataFrame()
     
     ### main ###
@@ -43,19 +42,14 @@ class Deconvolution():
         dat.set_data(self.__mix_data)
         if len(places)>0:
             dat.annotation(df_ref, places=places)
-            print("annotation")
         if trimming:
             dat.trimming(threshold=threshold, strategy=strategy, trim=trim, batch=batch, split=split)
-            print("trimming")
         if combat:
             dat.combat(batch_lst=batch_lst,plot=plot)
-            print("combat")
         if len(trans_method)>0:
             dat.transform(method=trans_method)
-            print("tranformation")
         if len(norm_method_list)>0:
             dat.normalize(methods=norm_method_list)
-            print("normalization")
         self.__mix_data = dat.res
 
     def preprocessing_ref(self, df_ref=None, places:list=[],                           
@@ -77,14 +71,14 @@ class Deconvolution():
             dat.normalize(methods=norm_method_list)
         self.__reference_data = dat.res
 
-    def deg(self,method:str="ttest",
+    def deg(self,method:str="ttest",intersection=False,
             sep:str="_",number=150,limit_CV=1,limit_FC=1.5,q_limit=0.05,
-            log2=False,plot=False):
+            log2=False,plot=False,prints=True):
         dat = deg.Deg()
         dat.set_method(method=method)
         dat.set_data(self.__mix_data,self.__reference_data)
-        dat.create_ref(sep=sep,number=number,limit_CV=limit_CV,limit_FC=limit_FC,q_limit=q_limit,log2=log2,plot=plot)
-        self.final_reference_data=dat.final_ref
+        dat.create_ref(sep=sep,number=number,limit_CV=limit_CV,limit_FC=limit_FC,q_limit=q_limit,log2=log2,plot=plot,intersection=intersection,prints=prints)
+        self.__reference_data = dat.final_ref
     
     def fit(self,method:str="",
             number_of_repeats=1,
@@ -94,7 +88,7 @@ class Deconvolution():
             combat=False,nonpara=False):
         dat=fitter.Fitter()
         dat.set_method(method=method)
-        dat.set_data(self.__mix_data,self.final_reference_data)
+        dat.set_data(self.__mix_data,self.__reference_data)
         dat.fit(number_of_repeats=number_of_repeats,alpha=alpha,l1_ratio=l1_ratio,nu=nu,max_iter=max_iter,combat=combat,nonpara=nonpara)
         self.__res=dat.res
 
@@ -119,6 +113,4 @@ class Deconvolution():
         return self.__res
     
     def get_data(self):
-        return self.__mix_data, self.__reference_data, self.final_reference_data
-
-    ###  ###
+        return self.__mix_data, self.__reference_data

@@ -93,14 +93,14 @@ class Fitter():
         mix_data_sum = pd.concat([self.df_mix,mix_data_estimated],axis=1)
         mix_data_corrected = pycombat(mix_data_sum,batch_list,par_prior=not nonpara)
         mix_data_corrected = mix_data_corrected.iloc[:,:len(self.res.index)]
-        self.__mix_data = mix_data_corrected
+        self.df_mix = mix_data_corrected
         return        
 
     # elasticnet    
     def _fit_ElasticNet(self,ref,dat,alpha=1,l1_ratio=0.05,max_iter=100000,**kwargs):
         model = ElasticNet(alpha=alpha, l1_ratio=l1_ratio, max_iter=max_iter, tol=1e-5, random_state=None, fit_intercept=True)
-        model.fit(ref,dat)
-        print("model score: {}".format(model.score(ref,dat)))
+        model.fit(ref.values,dat.values)
+        #print("model score: {}".format(model.score(ref,dat)))
         res_mat = pd.DataFrame(model.coef_,index=dat.columns, columns=ref.columns)
         return res_mat
 
@@ -113,9 +113,9 @@ class Fitter():
         res_mat=[]
         ap = res_mat.append
         for i in range(len(dat.columns)):
-            y = list(dat.iloc[:,i])
+            y = dat.iloc[:,i].values
             gscv = GridSearchCV(NuSVR(max_iter=max_iter), tune_parameters, scoring="neg_mean_squared_error")
-            gscv.fit(ref,y)
+            gscv.fit(ref.values,y)
             model = gscv.best_estimator_
             ap(model.coef_[0])
         res_mat = pd.DataFrame(res_mat,index=dat.columns, columns=ref.columns)
@@ -123,10 +123,10 @@ class Fitter():
 
     # NNLS
     def _fit_NNLS(self,ref,dat,**kwargs):
-        A = np.array(ref)
+        A = ref.values
         res_mat = pd.DataFrame(index=dat.columns, columns=ref.columns)
         for i in range(len(list(dat.columns))):
-            b = np.array(dat.iloc[:,i])
+            b = dat.iloc[:,i].values
             res_mat.iloc[i,:] = sp.optimize.nnls(A,b)[0]
         return res_mat
 

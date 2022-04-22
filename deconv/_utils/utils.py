@@ -81,7 +81,7 @@ def array_imputer(df,threshold=0.9,strategy="median",trim=1.0,batch=False,lst_ba
                 temp = temp.dropna(thresh=thresh)
                 imr = SimpleImputer(strategy=strategy)
                 imputed = imr.fit_transform(temp.values.T) # impute in columns
-                ap(pd.DataFrame(imputed.T,index=temp.index,columns=temp.columns))
+                ap(pd.DataFrame(imputed.T,index=temp.index.tolist(),columns=temp.columns.tolist()))
         if trim_red:
             df_res = pd.concat(lst,axis=1)
             df_res = df_res.replace(np.nan,0) + 1
@@ -93,7 +93,7 @@ def array_imputer(df,threshold=0.9,strategy="median",trim=1.0,batch=False,lst_ba
         df_c = df_c.dropna(thresh=thresh)
         imr = SimpleImputer(strategy=strategy)
         imputed = imr.fit_transform(df_c.values.T) # impute in columns
-        df_res = pd.DataFrame(imputed.T,index=df_c.index,columns=df_c.columns)
+        df_res = pd.DataFrame(imputed.T,index=df_c.index.tolist(),columns=df_c.columns.tolist())
     return df_res
 
 
@@ -247,7 +247,7 @@ def drop_all_missing(df):
     replace = df.replace(0,np.nan)
     drop = replace.dropna(how="all") # remove rows whose all values are missing
     res = drop.fillna(0)
-    print(len(df)-len(res),"rows are removed")
+    #print(len(df)-len(res),"rows are removed")
     return res
 
 def global_minmax(df):

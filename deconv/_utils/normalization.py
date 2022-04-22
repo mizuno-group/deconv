@@ -47,7 +47,7 @@ class Normalization():
             raise ValueError("!! Set method first !!")
         df_tmp = copy.deepcopy(self.data)
         for i,m in enumerate(self.methods):
-            print(i+1,":",m)
+            #print(i+1,":",m)
             df_tmp = self._do_norm(df_tmp,method=m)
         self.res=df_tmp
 
