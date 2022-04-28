@@ -23,6 +23,7 @@ class Deg():
         self.df_mix=pd.DataFrame()
         self.df_ref=pd.DataFrame()
         self.final_ref=pd.DataFrame()
+        self._pickup_genes_df=pd.DataFrame()
         self.__deg_class=None
         self.__method_dict={"ttest":ttest.Deg_ttest,"multiFC":multi_FC.Deg_Multi_FC}
     
@@ -50,5 +51,6 @@ class Deg():
             dat.narrow_intersection()
         dat.create_ref(sep=sep,number=number,limit_CV=limit_CV,limit_FC=limit_FC,q_limit=q_limit,log2=log2,plot=plot,prints=prints)
         self.final_ref = dat.final_ref
+        self._pickup_genes_df=dat._pickup_genes_df
 
     

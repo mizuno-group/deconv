@@ -23,6 +23,7 @@ class Deconvolution():
         self.__mix_data=pd.DataFrame()
         self.__reference_data=pd.DataFrame()
         self.__res=pd.DataFrame()
+        self._pickup_genes_df=pd.DataFrame()
     
     ### main ###
     def set_data(self,dat=pd.DataFrame(),ref=pd.DataFrame()):
@@ -79,6 +80,7 @@ class Deconvolution():
         dat.set_data(self.__mix_data,self.__reference_data)
         dat.create_ref(sep=sep,number=number,limit_CV=limit_CV,limit_FC=limit_FC,q_limit=q_limit,log2=log2,plot=plot,intersection=intersection,prints=prints)
         self.__reference_data = dat.final_ref
+        self._pickup_genes_df = dat._pickup_genes_df
     
     def fit(self,method:str="",
             number_of_repeats=1,
